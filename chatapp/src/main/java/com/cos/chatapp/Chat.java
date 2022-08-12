@@ -1,6 +1,6 @@
 package com.cos.chatapp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,5 +16,5 @@ public class Chat {
     private String sender;  // 보내는사람
     private String receiver;    // 받는사람
 
-    private LocalDate createAt;
+    private LocalDateTime createAt;
 }
