@@ -10,6 +10,6 @@ spring:
   datasource:
     hikari:
       driver-class-name: org.postgresql.Driver
-      jdbc-url: jdbc:postgresql://localhost:5432/chat
-      username: chat_user
+      jdbc-url: jdbc:postgresql://localhost:5432/chat?currentSchema=chat
+      username: jhjeon
       password: 1234
