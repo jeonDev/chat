@@ -5,3 +5,8 @@ spring:
     active: local
 server:
   port: 8080
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

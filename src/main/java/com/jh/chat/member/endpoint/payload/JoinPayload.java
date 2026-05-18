@@ -5,12 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record JoinPayload() {
 
+    @Schema(name = "JoinPayload.Request")
     public record Request(
-            @Schema(description = "로그인 ID", example = "jh")
+            @Schema(description = "로그인 ID", example = "jhjeon")
             String loginId,
             @Schema(description = "비밀번호", example = "password1234")
             String password,
-            @Schema(description = "회원 이름", example = "정지훈")
+            @Schema(description = "회원 이름", example = "전종현")
             String name
     ) {
         public JoinExecute toExecute() {
@@ -22,7 +23,7 @@ public record JoinPayload() {
         }
     }
 
-    @Schema(description = "회원가입 응답")
+    @Schema(name = "JoinPayload.Response")
     public record Response() {
 
     }
