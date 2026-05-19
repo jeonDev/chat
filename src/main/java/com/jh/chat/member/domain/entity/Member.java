@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "MEMBER")
+@Table(
+        name = "MEMBER",
+        uniqueConstraints = @UniqueConstraint(name = "UK_MEMBER_LOGIN_ID", columnNames = "LOGIN_ID")
+)
 public class Member extends BaseEntity {
 
     @Id
@@ -19,13 +22,13 @@ public class Member extends BaseEntity {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "LOGIN_ID", length = 30)
+    @Column(name = "LOGIN_ID", length = 30, nullable = false)
     private String loginId;
 
-    @Column(name = "PASSWORD", length = 200)
+    @Column(name = "PASSWORD", length = 200, nullable = false)
     private String password;
 
-    @Column(name = "NAME", length = 100)
+    @Column(name = "NAME", length = 100, nullable = false)
     private String name;
 
     public static Member of(String loginId,

@@ -57,12 +57,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!jwtTokenProvider.validateToken(token)) {
+        String loginId;
+        try {
+            loginId = jwtTokenProvider.getSubject(token);
+        } catch (RuntimeException e) {
+            SecurityContextHolder.clearContext();
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
         }
 
-        String loginId = jwtTokenProvider.getSubject(token);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 loginId,
                 null,
@@ -80,7 +83,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private String resolveToken(HttpServletRequest request) {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (!StringUtils.hasText(authorization) || !authorization.startsWith(BEARER_PREFIX)) {
+        if (!StringUtils.hasText(authorization)
+                || !authorization.regionMatches(true, 0, BEARER_PREFIX, 0, BEARER_PREFIX.length())) {
             return null;
         }
         return authorization.substring(BEARER_PREFIX.length());

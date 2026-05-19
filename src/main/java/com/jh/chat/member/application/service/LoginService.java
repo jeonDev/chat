@@ -9,6 +9,7 @@ import com.jh.chat.member.domain.repository.JpaMemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class LoginService {
@@ -28,6 +29,10 @@ public class LoginService {
 
     @Transactional(readOnly = true)
     public LoginResponse login(String loginId, String password) {
+        if (!StringUtils.hasText(loginId) || !StringUtils.hasText(password)) {
+            throw new ServiceException(ErrorType.INVALID_LOGIN);
+        }
+
         Member member = jpaMemberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new ServiceException(ErrorType.INVALID_LOGIN));
 

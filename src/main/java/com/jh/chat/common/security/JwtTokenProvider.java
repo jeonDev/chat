@@ -1,5 +1,6 @@
 package com.jh.chat.common.security;
 
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -17,6 +18,9 @@ import tools.jackson.databind.json.JsonMapper;
 public class JwtTokenProvider {
 
     private static final String HMAC_SHA256 = "HmacSHA256";
+    private static final String JWT_ALGORITHM = "HS256";
+    private static final String TOKEN_TYPE = "JWT";
+    private static final int MIN_HMAC_SECRET_BYTES = 32;
     private static final TypeReference<Map<String, Object>> CLAIMS_TYPE = new TypeReference<>() {
     };
 
@@ -30,13 +34,23 @@ public class JwtTokenProvider {
         this.jsonMapper = jsonMapper;
     }
 
+    @PostConstruct
+    void validateProperties() {
+        getSecret();
+        getExpirationMillis();
+    }
+
     public String createToken(String subject) {
+        if (!StringUtils.hasText(subject)) {
+            throw new IllegalArgumentException("JWT subject is required.");
+        }
+
         Instant now = Instant.now();
-        Instant expiresAt = now.plusMillis(appSecurityProperties.getJwt().getExpirationMillis());
+        Instant expiresAt = now.plusMillis(getExpirationMillis());
 
         Map<String, Object> header = new LinkedHashMap<>();
-        header.put("alg", "HS256");
-        header.put("typ", "JWT");
+        header.put("alg", JWT_ALGORITHM);
+        header.put("typ", TOKEN_TYPE);
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("sub", subject);
@@ -58,10 +72,10 @@ public class JwtTokenProvider {
 
     public String getSubject(String token) {
         Object subject = parseClaims(token).get("sub");
-        if (subject == null) {
+        if (!(subject instanceof String subjectText) || !StringUtils.hasText(subjectText)) {
             throw new IllegalArgumentException("JWT subject is missing.");
         }
-        return subject.toString();
+        return subjectText;
     }
 
     private Map<String, Object> parseClaims(String token) {
@@ -69,10 +83,15 @@ public class JwtTokenProvider {
             throw new IllegalArgumentException("JWT token is empty.");
         }
 
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) {
+        String[] parts = token.split("\\.", -1);
+        if (parts.length != 3
+                || !StringUtils.hasText(parts[0])
+                || !StringUtils.hasText(parts[1])
+                || !StringUtils.hasText(parts[2])) {
             throw new IllegalArgumentException("JWT token format is invalid.");
         }
+
+        validateHeader(parts[0]);
 
         String unsignedToken = parts[0] + "." + parts[1];
         String expectedSignature = sign(unsignedToken);
@@ -83,10 +102,25 @@ public class JwtTokenProvider {
 
         Map<String, Object> claims = decodePayload(parts[1]);
         long expiresAt = getLongClaim(claims, "exp");
-        if (expiresAt < Instant.now().getEpochSecond()) {
+        if (expiresAt <= Instant.now().getEpochSecond()) {
             throw new IllegalArgumentException("JWT token is expired.");
         }
+        Object subject = claims.get("sub");
+        if (!(subject instanceof String subjectText) || !StringUtils.hasText(subjectText)) {
+            throw new IllegalArgumentException("JWT subject is missing.");
+        }
         return claims;
+    }
+
+    private void validateHeader(String header) {
+        Map<String, Object> headerValues = decodePart(header);
+        if (!JWT_ALGORITHM.equals(headerValues.get("alg"))) {
+            throw new IllegalArgumentException("JWT algorithm is invalid.");
+        }
+        Object type = headerValues.get("typ");
+        if (type != null && !TOKEN_TYPE.equals(type)) {
+            throw new IllegalArgumentException("JWT type is invalid.");
+        }
     }
 
     private long getLongClaim(Map<String, Object> claims, String key) {
@@ -111,11 +145,15 @@ public class JwtTokenProvider {
     }
 
     private Map<String, Object> decodePayload(String payload) {
+        return decodePart(payload);
+    }
+
+    private Map<String, Object> decodePart(String value) {
         try {
-            byte[] decoded = Base64.getUrlDecoder().decode(payload);
+            byte[] decoded = Base64.getUrlDecoder().decode(value);
             return jsonMapper.readValue(decoded, CLAIMS_TYPE);
         } catch (Exception e) {
-            throw new IllegalArgumentException("JWT payload is invalid.", e);
+            throw new IllegalArgumentException("JWT content is invalid.", e);
         }
     }
 
@@ -137,6 +175,17 @@ public class JwtTokenProvider {
         if (!StringUtils.hasText(secret)) {
             throw new IllegalStateException("JWT secret is required.");
         }
+        if (secret.getBytes(StandardCharsets.UTF_8).length < MIN_HMAC_SECRET_BYTES) {
+            throw new IllegalStateException("JWT secret must be at least 32 bytes for HS256.");
+        }
         return secret;
+    }
+
+    private long getExpirationMillis() {
+        long expirationMillis = appSecurityProperties.getJwt().getExpirationMillis();
+        if (expirationMillis <= 0) {
+            throw new IllegalStateException("JWT expirationMillis must be positive.");
+        }
+        return expirationMillis;
     }
 }

@@ -1,7 +1,6 @@
 package com.jh.chat.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,9 +11,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ExceptionResponse> handleServiceException(ServiceException e) {
-        log.error("[error] handleServiceException : {} {}", e.getCode(), e.getMessage(), e);
+        log.warn("[service-exception] {} {}", e.getCode(), e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(e.getStatus())
                 .body(ExceptionResponse.of(e));
     }
 }

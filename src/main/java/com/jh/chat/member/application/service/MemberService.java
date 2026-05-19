@@ -5,12 +5,19 @@ import com.jh.chat.common.exception.ServiceException;
 import com.jh.chat.member.application.service.request.MemberGenerateRequest;
 import com.jh.chat.member.domain.entity.Member;
 import com.jh.chat.member.domain.repository.JpaMemberRepository;
+import java.nio.charset.StandardCharsets;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class MemberService {
+
+    private static final int MAX_LOGIN_ID_LENGTH = 30;
+    private static final int MAX_BCRYPT_PASSWORD_BYTES = 72;
+    private static final int MAX_NAME_LENGTH = 100;
 
     private final JpaMemberRepository jpaMemberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -24,12 +31,28 @@ public class MemberService {
 
     @Transactional
     public Member generate(MemberGenerateRequest request) {
+        if (request == null
+                || !StringUtils.hasText(request.loginId())
+                || !StringUtils.hasText(request.password())
+                || !StringUtils.hasText(request.name())) {
+            throw new ServiceException(ErrorType.INVALID_REQUEST);
+        }
+        if (request.loginId().length() > MAX_LOGIN_ID_LENGTH
+                || request.password().getBytes(StandardCharsets.UTF_8).length > MAX_BCRYPT_PASSWORD_BYTES
+                || request.name().length() > MAX_NAME_LENGTH) {
+            throw new ServiceException(ErrorType.INVALID_REQUEST);
+        }
+
         if (jpaMemberRepository.existsByLoginId(request.loginId())) {
             throw new ServiceException(ErrorType.ALREADY_JOINED_MEMBER);
         }
 
         String encPassword = passwordEncoder.encode(request.password());
 
-        return jpaMemberRepository.save(request.toEntity(encPassword));
+        try {
+            return jpaMemberRepository.save(request.toEntity(encPassword));
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException(ErrorType.ALREADY_JOINED_MEMBER);
+        }
     }
 }

@@ -1,20 +1,17 @@
 package com.jh.chat.common.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public class ServiceException extends RuntimeException {
 
+    private final HttpStatus status;
     private final String code;
-    private final String message;
-
-    private ServiceException(String code, String message) {
-        this.code = code;
-        this.message = message;
-    }
 
     public ServiceException(ErrorType errorType) {
+        super(errorType.getMessage());
+        this.status = errorType.getStatus();
         this.code = errorType.getCode();
-        this.message = errorType.getMessage();
     }
 }
