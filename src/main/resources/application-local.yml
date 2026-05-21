@@ -13,3 +13,9 @@ spring:
       jdbc-url: jdbc:postgresql://localhost:5432/chat?currentSchema=chat
       username: jhjeon
       password: 1234
+chat:
+  netty:
+    websocket:
+      enabled: true
+      port: 8090
+      path: /ws/chat

@@ -20,4 +20,9 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
-
+chat:
+  netty:
+    websocket:
+      enabled: false
+      port: 8090
+      path: /ws/chat

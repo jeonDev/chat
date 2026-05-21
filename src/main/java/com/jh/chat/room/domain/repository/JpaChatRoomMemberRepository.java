@@ -10,8 +10,9 @@ public interface JpaChatRoomMemberRepository extends JpaRepository<ChatRoomMembe
 
     List<ChatRoomMember> findAllByMember_IdAndStatus(Long memberId, ChatRoomMemberStatus status);
 
+    List<ChatRoomMember> findAllByChatRoom_IdAndStatus(Long chatRoomId, ChatRoomMemberStatus status);
+
     List<ChatRoomMember> findAllByChatRoom_Id(Long chatRoomId);
 
     Optional<ChatRoomMember> findByChatRoom_IdAndMember_Id(Long chatRoomId, Long memberId);
 }
-
