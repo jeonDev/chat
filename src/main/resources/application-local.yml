@@ -21,7 +21,7 @@ chat:
       path: /ws/chat
 security:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:3f8c9a7b2d6e4f1a8c0b9d7e6f5a4c3b2a1e9d8c7b6a5f4e3d2c1b0a9e8f7d6}
     expiration-millis: 3600000
   permit-all-uris:
     - /api/v1/join
@@ -39,4 +39,3 @@ security:
     allowed-headers: ${CORS_ALLOWED_HEADERS:*}
     allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
     max-age: ${CORS_MAX_AGE:3600}
-
