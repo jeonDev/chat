@@ -63,12 +63,12 @@ class ChatServiceTest {
         assertThat(result.message().content()).containsEntry("text", "hello");
         assertThat(result.offlineMemberIds()).containsExactly(receiver.getId());
 
-        var messages = chatMessageRepository.findAllByChatRoom_IdOrderBySentAtAsc(room.roomId());
+        var messages = chatMessageRepository.findAllByChatRoomIdOrderBySentAtAsc(room.roomId());
         assertThat(messages).hasSize(1);
         assertThat(messages.getFirst().getContent()).containsEntry("text", "hello");
 
         var notifications = chatNotificationRepository
-                .findAllByReceiver_IdAndStatus(receiver.getId(), ChatNotificationStatus.PENDING);
+                .findAllByReceiverIdAndStatus(receiver.getId(), ChatNotificationStatus.PENDING);
         assertThat(notifications).hasSize(1);
         assertThat(notifications.getFirst().getPayload()).containsEntry("messageType", "TEXT");
     }
@@ -77,4 +77,3 @@ class ChatServiceTest {
         return memberRepository.save(Member.of(loginId, "password", loginId));
     }
 }
-

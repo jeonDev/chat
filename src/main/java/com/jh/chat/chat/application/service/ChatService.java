@@ -63,7 +63,7 @@ public class ChatService {
                 .orElseThrow(() -> new NotFoundException("회원을 찾을 수 없습니다. memberId=%d".formatted(request.senderMemberId())));
 
         ChatRoomMember senderRoomMember = chatRoomMemberRepository
-                .findByChatRoom_IdAndMember_Id(chatRoom.getId(), sender.getId())
+                .findByChatRoomIdAndMemberId(chatRoom.getId(), sender.getId())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 참여자만 메시지를 보낼 수 있습니다."));
         if (!senderRoomMember.isJoined()) {
             throw new IllegalArgumentException("채팅방에 참여 중인 회원만 메시지를 보낼 수 있습니다.");
@@ -77,7 +77,7 @@ public class ChatService {
         List<Long> onlineMemberIds = new ArrayList<>();
         List<Long> offlineMemberIds = new ArrayList<>();
         List<ChatRoomMember> roomMembers = chatRoomMemberRepository
-                .findAllByChatRoom_IdAndStatus(chatRoom.getId(), ChatRoomMemberStatus.JOINED);
+                .findAllByChatRoomIdAndStatus(chatRoom.getId(), ChatRoomMemberStatus.JOINED);
 
         for (ChatRoomMember roomMember : roomMembers) {
             Long receiverMemberId = roomMember.getMember().getId();
@@ -108,7 +108,7 @@ public class ChatService {
             throw new NotFoundException("채팅방을 찾을 수 없습니다. roomId=%d".formatted(roomId));
         }
 
-        return chatMessageRepository.findAllByChatRoom_IdOrderBySentAtAsc(roomId)
+        return chatMessageRepository.findAllByChatRoomIdOrderBySentAtAsc(roomId)
                 .stream()
                 .map(ChatDeliveryMessage::of)
                 .toList();
@@ -148,4 +148,3 @@ public class ChatService {
         return payload;
     }
 }
-

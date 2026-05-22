@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaChatRoomMemberRepository extends JpaRepository<ChatRoomMember, Long> {
 
-    List<ChatRoomMember> findAllByMember_IdAndStatus(Long memberId, ChatRoomMemberStatus status);
+    List<ChatRoomMember> findAllByMemberIdAndStatus(Long memberId, ChatRoomMemberStatus status);
 
-    List<ChatRoomMember> findAllByChatRoom_IdAndStatus(Long chatRoomId, ChatRoomMemberStatus status);
+    List<ChatRoomMember> findAllByChatRoomIdAndStatus(Long chatRoomId, ChatRoomMemberStatus status);
 
-    List<ChatRoomMember> findAllByChatRoom_Id(Long chatRoomId);
+    List<ChatRoomMember> findAllByChatRoomId(Long chatRoomId);
 
-    Optional<ChatRoomMember> findByChatRoom_IdAndMember_Id(Long chatRoomId, Long memberId);
+    Optional<ChatRoomMember> findByChatRoomIdAndMemberId(Long chatRoomId, Long memberId);
 }

@@ -28,15 +28,32 @@ public class Member extends BaseEntity {
     @Column(name = "NAME", length = 100)
     private String name;
 
+    @Column(name = "PHONE", length = 100)
+    private String phone;
+
     public static Member of(String loginId,
                             String password,
                             String name
+    ) {
+        return of(loginId, password, name, null);
+    }
+
+    public static Member of(String loginId,
+                            String password,
+                            String name,
+                            String phone
     ) {
         return new Member(
                 null,
                 loginId,
                 password,
-                name
+                name,
+                phone
         );
+    }
+
+    public void updateProfile(String name, String phone) {
+        this.name = name;
+        this.phone = phone;
     }
 }

@@ -7,6 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaChatNotificationRepository extends JpaRepository<ChatNotification, Long> {
 
-    List<ChatNotification> findAllByReceiver_IdAndStatus(Long receiverId, ChatNotificationStatus status);
+    List<ChatNotification> findAllByReceiverIdAndStatus(Long receiverId, ChatNotificationStatus status);
 }
-

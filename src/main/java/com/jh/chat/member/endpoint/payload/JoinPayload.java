@@ -12,13 +12,16 @@ public record JoinPayload() {
             @Schema(description = "비밀번호", example = "password1234")
             String password,
             @Schema(description = "회원 이름", example = "전종현")
-            String name
+            String name,
+            @Schema(description = "연락처", example = "010-1234-5678")
+            String phone
     ) {
         public JoinExecute toExecute() {
             return new JoinExecute(
                     loginId,
                     password,
-                    name
+                    name,
+                    phone
             );
         }
     }

@@ -104,7 +104,7 @@ public class RoomService {
 
         getChatRoom(execute.roomId());
         ChatRoomMember roomMember = chatRoomMemberRepository
-                .findByChatRoom_IdAndMember_Id(execute.roomId(), execute.memberId())
+                .findByChatRoomIdAndMemberId(execute.roomId(), execute.memberId())
                 .orElseThrow(() -> new NotFoundException("채팅방 참여 정보를 찾을 수 없습니다."));
         roomMember.leave();
     }
@@ -117,7 +117,7 @@ public class RoomService {
 
         getMember(memberId);
 
-        return chatRoomMemberRepository.findAllByMember_IdAndStatus(memberId, ChatRoomMemberStatus.JOINED)
+        return chatRoomMemberRepository.findAllByMemberIdAndStatus(memberId, ChatRoomMemberStatus.JOINED)
                 .stream()
                 .map(ChatRoomMember::getChatRoom)
                 .map(this::getRoomResult)
@@ -178,7 +178,7 @@ public class RoomService {
     }
 
     private void validateJoinedMember(Long roomId, Long memberId) {
-        ChatRoomMember roomMember = chatRoomMemberRepository.findByChatRoom_IdAndMember_Id(roomId, memberId)
+        ChatRoomMember roomMember = chatRoomMemberRepository.findByChatRoomIdAndMemberId(roomId, memberId)
                 .orElseThrow(() -> new IllegalArgumentException("요청 회원은 채팅방 참여자가 아닙니다."));
 
         if (!roomMember.isJoined()) {
@@ -187,7 +187,7 @@ public class RoomService {
     }
 
     private void joinOrRejoin(ChatRoom chatRoom, Member member) {
-        chatRoomMemberRepository.findByChatRoom_IdAndMember_Id(chatRoom.getId(), member.getId())
+        chatRoomMemberRepository.findByChatRoomIdAndMemberId(chatRoom.getId(), member.getId())
                 .ifPresentOrElse(
                         ChatRoomMember::rejoin,
                         () -> chatRoomMemberRepository.save(ChatRoomMember.join(chatRoom, member))
@@ -229,7 +229,7 @@ public class RoomService {
     private RoomResult getRoomResult(ChatRoom chatRoom) {
         return RoomResult.of(
                 chatRoom,
-                chatRoomMemberRepository.findAllByChatRoom_Id(chatRoom.getId())
+                chatRoomMemberRepository.findAllByChatRoomId(chatRoom.getId())
         );
     }
 }
