@@ -14,3 +14,6 @@ Default package boundaries:
 Prefer the existing `domain/application/endpoint` layout before adding new structure.
 
 Use REST for HTTP APIs. For Netty/socket work, keep protocol semantics but preserve the same boundaries.
+
+Spring Data JPA derived query methods should use camel nested property names without underscores.
+Example: use `existsByRequesterIdAndFriendId`, not `existsByRequester_IdAndFriend_Id`.

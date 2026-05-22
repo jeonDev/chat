@@ -25,6 +25,12 @@ Default packages:
 
 Application input/output models must differ from endpoint payloads. Do not expose JPA entities in HTTP responses.
 
+## Spring Data JPA
+
+- Use camel nested property names in derived query methods.
+- Do not use underscores for association id traversal.
+- Example: `existsByRequesterIdAndFriendId`, not `existsByRequester_IdAndFriend_Id`.
+
 ## REST
 
 - URLs are resources, not actions.
