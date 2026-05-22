@@ -26,3 +26,12 @@ chat:
       enabled: false
       port: 8090
       path: /ws/chat
+security:
+  jwt:
+    secret: 0123456789abcdef0123456789abcdef
+    expiration-millis: 3600000
+  permit-all-uris:
+    - /api/v1/join
+    - /api/v1/login
+  authenticated-uris:
+    - /api/v1/**

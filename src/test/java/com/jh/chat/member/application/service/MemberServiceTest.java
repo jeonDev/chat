@@ -1,36 +1,94 @@
 package com.jh.chat.member.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import com.jh.chat.member.application.service.request.MemberProfileUpdateRequest;
+import com.jh.chat.common.exception.ServiceException;
+import com.jh.chat.member.application.service.request.MemberGenerateRequest;
 import com.jh.chat.member.domain.entity.Member;
 import com.jh.chat.member.domain.repository.JpaMemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Transactional
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
-    @Autowired
+    @Mock
+    private JpaMemberRepository jpaMemberRepository;
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     private MemberService memberService;
 
-    @Autowired
-    private JpaMemberRepository memberRepository;
+    @BeforeEach
+    void setUp() {
+        memberService = new MemberService(jpaMemberRepository, passwordEncoder);
+    }
 
     @Test
-    void updateProfile_updatesNameAndPhone() {
-        Member member = memberRepository.save(Member.of("profile-user", "password", "before", "010-0000-0000"));
+    void generateStoresEncodedPassword() {
+        when(jpaMemberRepository.existsByLoginId("jhjeon")).thenReturn(false);
+        when(jpaMemberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = memberService.updateProfile(
-                new MemberProfileUpdateRequest(member.getId(), "after", "010-1111-2222")
+        Member member = memberService.generate(
+                new MemberGenerateRequest("jhjeon", "password1234", "전종현", "010-1234-5678")
         );
 
-        assertThat(result.name()).isEqualTo("after");
-        assertThat(result.phone()).isEqualTo("010-1111-2222");
-        assertThat(memberService.getProfile(member.getId()).phone()).isEqualTo("010-1111-2222");
+        assertNotEquals("password1234", member.getPassword());
+        assertTrue(passwordEncoder.matches("password1234", member.getPassword()));
+    }
+
+    @Test
+    void generateRejectsBlankInput() {
+        ServiceException exception = assertThrows(ServiceException.class,
+                () -> memberService.generate(new MemberGenerateRequest("jhjeon", " ", "전종현", null)));
+
+        assertEquals("INVALID_REQUEST", exception.getCode());
+        verifyNoMoreInteractions(jpaMemberRepository);
+    }
+
+    @Test
+    void generateRejectsPasswordLongerThanBcryptLimit() {
+        ServiceException exception = assertThrows(ServiceException.class,
+                () -> memberService.generate(new MemberGenerateRequest("jhjeon", "a".repeat(73), "전종현", null)));
+
+        assertEquals("INVALID_REQUEST", exception.getCode());
+        verifyNoMoreInteractions(jpaMemberRepository);
+    }
+
+    @Test
+    void generateRejectsAlreadyJoinedLoginId() {
+        when(jpaMemberRepository.existsByLoginId("jhjeon")).thenReturn(true);
+
+        ServiceException exception = assertThrows(ServiceException.class,
+                () -> memberService.generate(new MemberGenerateRequest("jhjeon", "password1234", "전종현", null)));
+
+        assertEquals("ALREADY_JOINED_MEMBER", exception.getCode());
+        verify(jpaMemberRepository).existsByLoginId("jhjeon");
+        verifyNoMoreInteractions(jpaMemberRepository);
+    }
+
+    @Test
+    void generateMapsUniqueConstraintViolationToAlreadyJoinedMember() {
+        when(jpaMemberRepository.existsByLoginId("jhjeon")).thenReturn(false);
+        when(jpaMemberRepository.save(any(Member.class))).thenThrow(new DataIntegrityViolationException("duplicate"));
+
+        ServiceException exception = assertThrows(ServiceException.class,
+                () -> memberService.generate(new MemberGenerateRequest("jhjeon", "password1234", "전종현", null)));
+
+        assertEquals("ALREADY_JOINED_MEMBER", exception.getCode());
     }
 }
 

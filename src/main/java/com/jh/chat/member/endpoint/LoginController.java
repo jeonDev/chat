@@ -1,10 +1,13 @@
 package com.jh.chat.member.endpoint;
 
+import com.jh.chat.common.exception.ErrorType;
+import com.jh.chat.common.exception.ServiceException;
 import com.jh.chat.member.application.usecase.JoinUseCase;
 import com.jh.chat.member.application.usecase.LoginUseCase;
 import com.jh.chat.member.endpoint.payload.JoinPayload;
 import com.jh.chat.member.endpoint.payload.LoginPayload;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +26,23 @@ public class LoginController {
     private final LoginUseCase loginUseCase;
 
     @Operation(summary = "회원가입", description = "로그인 ID, 비밀번호, 이름으로 회원을 생성합니다.")
+    @SecurityRequirements(value = {})
     @PostMapping("/api/v1/join")
     public ResponseEntity<Void> join(@RequestBody JoinPayload.Request request) {
+        if (request == null) {
+            throw new ServiceException(ErrorType.INVALID_REQUEST);
+        }
         joinUseCase.execute(request.toExecute());
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "로그인", description = "로그인 ID와 비밀번호로 액세스 토큰을 발급합니다.")
+    @SecurityRequirements(value = {})
     @PostMapping("/api/v1/login")
     public ResponseEntity<LoginPayload.Response> login(@RequestBody LoginPayload.Request request) {
+        if (request == null) {
+            throw new ServiceException(ErrorType.INVALID_REQUEST);
+        }
         var result = loginUseCase.execute(request.loginId(), request.password());
         return ResponseEntity.ok(LoginPayload.Response.of(result.accessToken()));
     }
