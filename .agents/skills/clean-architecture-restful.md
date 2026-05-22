@@ -29,7 +29,6 @@ Application input/output models must differ from endpoint payloads. Do not expos
 
 - Use camel nested property names in derived query methods.
 - Do not use underscores for association id traversal.
-- Example: `existsByRequesterIdAndFriendId`, not `existsByRequester_IdAndFriend_Id`.
 
 ## REST
 
