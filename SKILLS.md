@@ -1,18 +1,12 @@
 # Skill Index
 
-For production code changes, read:
+Skills follow the Agent Skills folder format:
 
-- `.agents/skills/clean-architecture-restful.md`
+- `.agents/skills/<skill-name>/SKILL.md`
+- `SKILL.md` must include YAML frontmatter with `name` and `description`.
 
-Default package boundaries:
+## Available Skills
 
-- `domain`: entities, rules, repository contracts.
-- `application`: use cases, services, commands, queries.
-- `endpoint`: HTTP controllers and payload mapping.
-- `infra`: persistence, external APIs, messaging, framework adapters.
-
-Prefer the existing `domain/application/endpoint` layout before adding new structure.
-
-Use REST for HTTP APIs. For Netty/socket work, keep protocol semantics but preserve the same boundaries.
-
-Spring Data JPA derived query methods should use camel nested property names without underscores.
+- `clean-architecture-restful`: `.agents/skills/clean-architecture-restful/SKILL.md`
+  Use for production Java/Spring code, package boundaries, REST APIs, DTOs, JPA repositories, persistence adapters, and Netty/socket handlers.
+  Role-specific details live in `.agents/skills/clean-architecture-restful/references/`.

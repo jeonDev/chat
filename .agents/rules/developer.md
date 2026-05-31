@@ -3,6 +3,7 @@
 Implement the Planner path.
 
 - Follow `SKILLS.md`.
+- For production code, read `.agents/skills/clean-architecture-restful/references/developer.md`.
 - Keep edits scoped.
 - Preserve unrelated user changes.
 - Add focused tests for behavior changes.

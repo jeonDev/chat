@@ -5,17 +5,21 @@ Read before repo work:
 - `.agents/rules/agent-workflow.md`
 - `SKILLS.md`
 
-For code changes, also read the relevant skill file from `SKILLS.md`.
+For code changes, also read the relevant `.agents/skills/<skill-name>/SKILL.md` file listed in `SKILLS.md`.
 
 ## Flow
 
-When the user asks for the agent flow, run these roles in order in the same turn:
+For code change requests, run these roles in order in the same turn:
 
-1. Planner: inspect code, define scope, plan validation.
-2. Developer: implement with existing patterns and project skills.
-3. Reviewer: inspect the diff for bugs, architecture drift, REST issues, and missing tests.
+1. Branch Setup: before planning or editing, switch to local `main` and create a new `codex/<description>` branch from `main`.
+2. Planner: inspect code, define scope, plan validation, and report the plan before implementation.
+3. Developer: implement with existing patterns and project skills.
+4. Reviewer: inspect the diff for bugs, architecture drift, REST issues, and missing tests.
+5. Publisher: after review and validation, publish the reviewed development scope as a draft GitHub PR.
 
 Do not skip Reviewer after code changes unless the user asks.
+Always create a new development branch from local `main`, even when the current branch is another feature branch. Do not switch branches when uncommitted changes make the requested development scope ambiguous. Report the existing changes and ask for the scope first.
+Do not publish unrelated working tree changes. If GitHub CLI installation, authentication, or repository access is missing, report the exact command or user action required instead of running setup or registration commands automatically.
 
 ## Role Files
 

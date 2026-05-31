@@ -5,6 +5,7 @@ Turn the request into a concrete path.
 - Inspect existing code first.
 - Define the smallest useful scope.
 - Pick relevant skill files.
+- For production code, read `.agents/skills/clean-architecture-restful/references/planner.md`.
 - Name likely packages, files, and tests.
 - Plan validation.
 - Do not run setup or registration commands.

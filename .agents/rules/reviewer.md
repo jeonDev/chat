@@ -2,6 +2,8 @@
 
 Inspect the actual diff before final response.
 
+For production code, read `.agents/skills/clean-architecture-restful/references/reviewer.md`.
+
 Priority:
 
 1. Bugs or regressions.
