@@ -13,12 +13,10 @@ public record RoomPayload() {
 
     @Schema(name = "RoomPayload.DirectCreateRequest")
     public record DirectCreateRequest(
-            @Schema(description = "요청 회원 ID", example = "1")
-            Long requesterMemberId,
             @Schema(description = "대화 상대 회원 ID", example = "2")
             Long partnerMemberId
     ) {
-        public DirectRoomCreateExecute toExecute() {
+        public DirectRoomCreateExecute toExecute(Long requesterMemberId) {
             return new DirectRoomCreateExecute(
                     requesterMemberId,
                     partnerMemberId
@@ -30,12 +28,10 @@ public record RoomPayload() {
     public record GroupCreateRequest(
             @Schema(description = "단체방 이름", example = "프로젝트 회의방")
             String name,
-            @Schema(description = "방 생성자 회원 ID", example = "1")
-            Long ownerMemberId,
             @Schema(description = "초기 참여 회원 ID 목록. 생성자는 자동 포함됩니다.", example = "[2, 3]")
             List<Long> memberIds
     ) {
-        public GroupRoomCreateExecute toExecute() {
+        public GroupRoomCreateExecute toExecute(Long ownerMemberId) {
             return new GroupRoomCreateExecute(
                     name,
                     ownerMemberId,
@@ -46,12 +42,10 @@ public record RoomPayload() {
 
     @Schema(name = "RoomPayload.InviteMembersRequest")
     public record InviteMembersRequest(
-            @Schema(description = "요청 회원 ID", example = "1")
-            Long requesterMemberId,
             @Schema(description = "초대할 회원 ID 목록", example = "[4, 5]")
             List<Long> memberIds
     ) {
-        public GroupRoomInviteExecute toExecute(Long roomId) {
+        public GroupRoomInviteExecute toExecute(Long roomId, Long requesterMemberId) {
             return new GroupRoomInviteExecute(
                     roomId,
                     requesterMemberId,
@@ -104,4 +98,3 @@ public record RoomPayload() {
         }
     }
 }
-

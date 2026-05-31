@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,12 +47,13 @@ class LoginServiceTest {
     @Test
     void loginReturnsSignedTokenWhenPasswordMatches() {
         Member member = Member.of("jhjeon", passwordEncoder.encode("password1234"), "전종현");
+        ReflectionTestUtils.setField(member, "id", 1L);
         when(jpaMemberRepository.findByLoginId("jhjeon")).thenReturn(Optional.of(member));
 
         var response = loginService.login("jhjeon", "password1234");
 
         assertTrue(jwtTokenProvider.validateToken(response.accessToken()));
-        assertEquals("jhjeon", jwtTokenProvider.getSubject(response.accessToken()));
+        assertEquals("1", jwtTokenProvider.getSubject(response.accessToken()));
     }
 
     @Test

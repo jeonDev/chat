@@ -1,5 +1,6 @@
 package com.jh.chat.room.endpoint;
 
+import com.jh.chat.common.security.CurrentMemberProvider;
 import com.jh.chat.room.application.usecase.CreateDirectRoomUseCase;
 import com.jh.chat.room.application.usecase.CreateGroupRoomUseCase;
 import com.jh.chat.room.application.usecase.FindRoomUseCase;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -32,11 +32,12 @@ public class RoomController {
     private final InviteGroupRoomUseCase inviteGroupRoomUseCase;
     private final LeaveRoomUseCase leaveRoomUseCase;
     private final FindRoomUseCase findRoomUseCase;
+    private final CurrentMemberProvider currentMemberProvider;
 
     @Operation(summary = "참여 중인 채팅방 목록 조회", description = "회원이 현재 참여 중인 채팅방 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<RoomPayload.Response>> getJoinedRooms(@RequestParam Long memberId) {
-        var response = findRoomUseCase.findJoinedRooms(memberId).stream()
+    public ResponseEntity<List<RoomPayload.Response>> getJoinedRooms() {
+        var response = findRoomUseCase.findJoinedRooms(currentMemberProvider.getCurrentMemberId()).stream()
                 .map(RoomPayload.Response::of)
                 .toList();
 
@@ -54,7 +55,7 @@ public class RoomController {
     public ResponseEntity<RoomPayload.Response> createDirectRoom(
             @RequestBody RoomPayload.DirectCreateRequest request
     ) {
-        var result = createDirectRoomUseCase.execute(request.toExecute());
+        var result = createDirectRoomUseCase.execute(request.toExecute(currentMemberProvider.getCurrentMemberId()));
         return ResponseEntity.ok(RoomPayload.Response.of(result));
     }
 
@@ -63,7 +64,7 @@ public class RoomController {
     public ResponseEntity<RoomPayload.Response> createGroupRoom(
             @RequestBody RoomPayload.GroupCreateRequest request
     ) {
-        var result = createGroupRoomUseCase.execute(request.toExecute());
+        var result = createGroupRoomUseCase.execute(request.toExecute(currentMemberProvider.getCurrentMemberId()));
         return ResponseEntity.ok(RoomPayload.Response.of(result));
     }
 
@@ -73,15 +74,14 @@ public class RoomController {
             @PathVariable Long roomId,
             @RequestBody RoomPayload.InviteMembersRequest request
     ) {
-        var result = inviteGroupRoomUseCase.execute(request.toExecute(roomId));
+        var result = inviteGroupRoomUseCase.execute(request.toExecute(roomId, currentMemberProvider.getCurrentMemberId()));
         return ResponseEntity.ok(RoomPayload.Response.of(result));
     }
 
     @Operation(summary = "채팅방 나가기", description = "채팅방을 삭제하지 않고 회원 참여 상태만 나감으로 변경합니다.")
-    @DeleteMapping("/{roomId}/members/{memberId}")
-    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, @PathVariable Long memberId) {
-        leaveRoomUseCase.execute(new RoomLeaveExecute(roomId, memberId));
+    @DeleteMapping("/{roomId}/members")
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId) {
+        leaveRoomUseCase.execute(new RoomLeaveExecute(roomId, currentMemberProvider.getCurrentMemberId()));
         return ResponseEntity.noContent().build();
     }
 }
-

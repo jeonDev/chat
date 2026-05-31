@@ -9,8 +9,6 @@ public record FriendPayload() {
 
     @Schema(name = "FriendPayload.AddRequest")
     public record AddRequest(
-            @Schema(description = "친구를 추가하는 회원 ID", example = "1")
-            Long requesterMemberId,
             @Schema(description = "친구로 추가할 회원 ID", example = "2")
             Long friendMemberId
     ) {
@@ -50,4 +48,3 @@ public record FriendPayload() {
         }
     }
 }
-

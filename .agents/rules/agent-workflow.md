@@ -43,7 +43,11 @@ After review and validation, publish only the reviewed development scope as a dr
 
 - Inspect `git status -sb` and the diff before staging.
 - Do not include unrelated working tree changes.
-- Commit and push the reviewed files, then open a draft PR.
+- Commit the reviewed files locally before attempting any remote publication.
+- Use the repository commit message format `<type> : <description>`, such as `feat : ...`, `fix : ...`, or `chore : ...`.
+- Immediately push the local commit to the current remote development branch without asking for separate confirmation. If the branch has no upstream, push with upstream tracking.
+- Open a draft PR after the push.
+- If push or PR creation is blocked, keep the local commit and report the blocker.
 - If GitHub CLI installation, authentication, or repository access is missing, report the exact command or user action required instead of running setup or registration commands.
 
 ## Commands

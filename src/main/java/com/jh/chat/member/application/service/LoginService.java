@@ -40,6 +40,6 @@ public class LoginService {
             throw new ServiceException(ErrorType.INVALID_LOGIN);
         }
 
-        return new LoginResponse(jwtTokenProvider.createToken(member.getLoginId()));
+        return new LoginResponse(jwtTokenProvider.createToken(member.getId().toString()));
     }
 }
