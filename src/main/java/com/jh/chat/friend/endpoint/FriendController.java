@@ -1,5 +1,6 @@
 package com.jh.chat.friend.endpoint;
 
+import com.jh.chat.common.security.CurrentMemberProvider;
 import com.jh.chat.friend.application.usecase.AddFriendUseCase;
 import com.jh.chat.friend.application.usecase.FindFriendUseCase;
 import com.jh.chat.friend.endpoint.payload.FriendPayload;
@@ -23,14 +24,14 @@ public class FriendController {
 
     private final FindFriendUseCase findFriendUseCase;
     private final AddFriendUseCase addFriendUseCase;
+    private final CurrentMemberProvider currentMemberProvider;
 
     @Operation(summary = "친구 검색", description = "이름 또는 연락처로 친구를 검색합니다.")
     @GetMapping("/search")
     public ResponseEntity<List<FriendPayload.SearchResponse>> search(
-            @RequestParam Long memberId,
             @RequestParam String keyword
     ) {
-        var response = findFriendUseCase.search(memberId, keyword)
+        var response = findFriendUseCase.search(currentMemberProvider.getCurrentMemberId(), keyword)
                 .stream()
                 .map(FriendPayload.SearchResponse::of)
                 .toList();
@@ -40,8 +41,8 @@ public class FriendController {
 
     @Operation(summary = "내 친구 목록", description = "내가 친구로 추가한 회원 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<FriendPayload.MemberResponse>> getMyFriends(@RequestParam Long memberId) {
-        var response = findFriendUseCase.getMyFriends(memberId)
+    public ResponseEntity<List<FriendPayload.MemberResponse>> getMyFriends() {
+        var response = findFriendUseCase.getMyFriends(currentMemberProvider.getCurrentMemberId())
                 .stream()
                 .map(FriendPayload.MemberResponse::of)
                 .toList();
@@ -51,8 +52,8 @@ public class FriendController {
 
     @Operation(summary = "나를 친구 추가한 목록", description = "나를 친구로 추가한 회원 목록을 조회합니다.")
     @GetMapping("/added-me")
-    public ResponseEntity<List<FriendPayload.MemberResponse>> getMembersWhoAddedMe(@RequestParam Long memberId) {
-        var response = findFriendUseCase.getMembersWhoAddedMe(memberId)
+    public ResponseEntity<List<FriendPayload.MemberResponse>> getMembersWhoAddedMe() {
+        var response = findFriendUseCase.getMembersWhoAddedMe(currentMemberProvider.getCurrentMemberId())
                 .stream()
                 .map(FriendPayload.MemberResponse::of)
                 .toList();
@@ -65,9 +66,8 @@ public class FriendController {
     public ResponseEntity<FriendPayload.MemberResponse> addFriend(@RequestBody FriendPayload.AddRequest request) {
         return ResponseEntity.ok(
                 FriendPayload.MemberResponse.of(
-                        addFriendUseCase.execute(request.requesterMemberId(), request.friendMemberId())
+                        addFriendUseCase.execute(currentMemberProvider.getCurrentMemberId(), request.friendMemberId())
                 )
         );
     }
 }
-

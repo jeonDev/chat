@@ -47,7 +47,7 @@ class JwtTokenFilterTest {
     @Test
     void doFilterAuthenticatesBearerToken() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/messages");
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenProvider.createToken("jhjeon"));
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenProvider.createToken("1"));
         MockHttpServletResponse response = new MockHttpServletResponse();
         AtomicReference<Authentication> authenticationInChain = new AtomicReference<>();
 
@@ -55,7 +55,7 @@ class JwtTokenFilterTest {
                 authenticationInChain.set(SecurityContextHolder.getContext().getAuthentication()));
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals("jhjeon", authenticationInChain.get().getPrincipal());
+        assertEquals(1L, authenticationInChain.get().getPrincipal());
         assertEquals("ROLE_USER", authenticationInChain.get().getAuthorities().iterator().next().getAuthority());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
@@ -63,20 +63,35 @@ class JwtTokenFilterTest {
     @Test
     void doFilterAcceptsCaseInsensitiveBearerScheme() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/messages");
-        request.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwtTokenProvider.createToken("jhjeon"));
+        request.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwtTokenProvider.createToken("1"));
         MockHttpServletResponse response = new MockHttpServletResponse();
         AtomicReference<Authentication> authenticationInChain = new AtomicReference<>();
 
         jwtTokenFilter.doFilter(request, response, (servletRequest, servletResponse) ->
                 authenticationInChain.set(SecurityContextHolder.getContext().getAuthentication()));
 
-        assertEquals("jhjeon", authenticationInChain.get().getPrincipal());
+        assertEquals(1L, authenticationInChain.get().getPrincipal());
     }
 
     @Test
     void doFilterRejectsInvalidBearerTokenBeforeChain() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/messages");
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer invalid-token");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        AtomicBoolean chainCalled = new AtomicBoolean(false);
+
+        jwtTokenFilter.doFilter(request, response, (servletRequest, servletResponse) ->
+                chainCalled.set(true));
+
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+        assertFalse(chainCalled.get());
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void doFilterRejectsTokenWithNonNumericSubjectBeforeChain() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/messages");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenProvider.createToken("jhjeon"));
         MockHttpServletResponse response = new MockHttpServletResponse();
         AtomicBoolean chainCalled = new AtomicBoolean(false);
 

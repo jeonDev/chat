@@ -57,9 +57,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
 
-        String loginId;
+        Long memberId;
         try {
-            loginId = jwtTokenProvider.getSubject(token);
+            memberId = Long.valueOf(jwtTokenProvider.getSubject(token));
         } catch (RuntimeException e) {
             SecurityContextHolder.clearContext();
             response.sendError(HttpStatus.UNAUTHORIZED.value());
@@ -67,7 +67,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                loginId,
+                memberId,
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
