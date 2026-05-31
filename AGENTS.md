@@ -21,6 +21,7 @@ Do not skip Reviewer after code changes unless the user asks.
 Always create a new development branch from local `main`, even when the current branch is another feature branch. Do not switch branches when uncommitted changes make the requested development scope ambiguous. Report the existing changes and ask for the scope first.
 Do not publish unrelated working tree changes. If GitHub CLI installation, authentication, or repository access is missing, report the exact command or user action required instead of running setup or registration commands automatically.
 After review and validation, always create a local commit for the reviewed development scope before attempting to push or open a PR. If push or PR creation is blocked, keep the local commit and report the blocker.
+Immediately push the new commit to the current remote development branch without asking for separate confirmation. If the branch has no upstream, push with upstream tracking.
 Use the repository commit message format `<type> : <description>`, such as `feat : ...`, `fix : ...`, or `chore : ...`. Choose the type that matches the reviewed scope.
 
 ## Role Files
